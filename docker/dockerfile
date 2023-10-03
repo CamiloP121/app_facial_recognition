@@ -13,6 +13,9 @@ RUN python3 -m pip install -U pip
 RUN echo "deb http://deb.debian.org/debian/ bullseye main contrib" >>  /etc/apt/sources.list && \
     echo "deb-src http://deb.debian.org/debian/ bullseye main contrib" >>  /etc/apt/sources.list
 
+RUN apt-get update && \ 
+    apt-get install -y libgl1-mesa-glx
+
 # Add locales 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y locales tzdata
 
@@ -24,7 +27,7 @@ RUN sed -i -e 's/# es_CO.UTF-8 UTF-8/es_CO.UTF-8 UTF-8/' /etc/locale.gen && \
 RUN pip install fastapi && \
    pip install 'uvicorn[standard]' && \
    pip install Jinja2 && \
-   pip install opencv-python-headless
+   pip install mediapipe
    
 ENV LANG es_CO.UTF-8
 ENV TZ='America/Bogota'
@@ -32,4 +35,4 @@ ENV TZ='America/Bogota'
 WORKDIR /app_face_reco
 
 # Production 
-CMD ["uvicorn","app:app","--host", "0.0.0.0","--port","8590","--loop","asyncio","--workers=1","--reload"]
+CMD ["uvicorn","app:app","--host", "0.0.0.0","--port","8590","--reload"]
