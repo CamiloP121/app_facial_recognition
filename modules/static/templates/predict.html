@@ -41,7 +41,7 @@
         let canvas_return = document.querySelector("#canvas2");
         let context_return = canvas2.getContext("2d");
 
-        let socket = new WebSocket("ws://127.0.0.1:8590/ArkangelAI/predict/ws");
+        let socket = new WebSocket("ws://localhost:8590/ArkangelAI/predict/ws");
 
         socket.onopen = function() {
             console.log("Conexión abierta");
@@ -72,11 +72,18 @@
 
         // Acceso a la webcam
         async function init() {
-        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+        if (navigator.mediaDevices || navigator.mediaDevices.getUserMedia) {
         try {
-            const stream = await navigator.mediaDevices.getUserMedia(constraints);
-            handleSuccess(stream);
-            } catch (e) {
+            navigator.mediaDevices.getUserMedia({video: true})
+            .then(mediaStream => {
+            video.srcObject = mediaStream;
+            setInterval(function() {
+                context.drawImage(video, 0, 0, canvas.width, canvas.height);
+                let imageData = canvas.toDataURL("image/jpeg", 0.5);
+                socket.send(imageData);
+            }, 200);
+            })
+        } catch (e) {
             console.log(e.message);
             console.log("Elemento no encontrado");
             }
