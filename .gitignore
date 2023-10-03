@@ -10,7 +10,7 @@ tmp/
 tmp/*
 upload_folder/
 
-instance/
-instance/*
+models/
+models/*
 
 __pycache__/
