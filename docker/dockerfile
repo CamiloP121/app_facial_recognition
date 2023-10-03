@@ -22,7 +22,7 @@ RUN sed -i -e 's/# es_CO.UTF-8 UTF-8/es_CO.UTF-8 UTF-8/' /etc/locale.gen && \
 
 # Add dependencies
 RUN pip install fastapi && \
-   pip install uvicorn && \
+   pip install 'uvicorn[standard]' && \
    pip install Jinja2 && \
    pip install opencv-python-headless
    
