@@ -1,0 +1,16 @@
+logs/
+log/*
+logs/*
+**/log
+**/logs
+
+
+#tmp
+tmp/
+tmp/*
+upload_folder/
+
+instance/
+instance/*
+
+__pycache__/
