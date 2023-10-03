@@ -7,7 +7,7 @@ import asyncio
 from pathlib import Path
 import logging
 from starlette.datastructures import URL
-#from modules.backend.mediapipe import hands_detect
+from modules.backend.face_mediapipe import face_detect
 import cv2
 import base64
 
@@ -53,7 +53,7 @@ async def capture_video(websocket: WebSocket):
         # Decodificar los datos de la imagen en base64
         img = utils.base64toimage(data.split(',')[1].encode(), save=False)
         # Procesar el cuadro de video
-        # _ , img, _ = hands_detect(img, plot=False, on_predictions=True)
+        _ , img, _ = face_detect(img, plot=False, on_predictions=True)
         img = cv2.flip(img, 1)
         _, buffer = cv2.imencode('.jpg', img)
         processed_frame =  base64.b64encode(buffer).decode("ascii")
