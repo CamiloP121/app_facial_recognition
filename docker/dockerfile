@@ -1,4 +1,4 @@
-FROM python:3.8
+FROM python:3.10
 
 ARG ssh_prv_key
 ARG ssh_pub_key
@@ -28,6 +28,7 @@ RUN pip install fastapi && \
    pip install 'uvicorn[standard]' && \
    pip install Jinja2 && \
    pip install keras && \
+   pip install tensorflow && \
    pip install mediapipe
    
 ENV LANG es_CO.UTF-8
