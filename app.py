@@ -12,6 +12,7 @@ from modules.backend.ia_models import Model
 import cv2
 import base64
 import json
+import pickle
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -35,18 +36,18 @@ app.mount("/static", StaticFiles(directory="modules/static"), name="static")
 templates = Jinja2Templates(directory="modules/static/templates")
 
 # Create class model
-with open('modules/backend/name_clases.json', 'r') as file:
-    lables = json.load(file)
+with open('models/matriz_face_detection.pkl', 'rb') as file:
+    lables = pickle.load(file)
 
 face_recognizer = Model(
-    path_model_FR= "models/model_face_recognition.h5",
+    path_model_FR= "models/VGG16.h5",
     dict_labels=lables
 )
 
 # Predit page
 @app.route("/ArkangelAI/predict")
 def predict(request:Request):
-    title = 'Predicción alfabeto de Señas'
+    title = 'Prueba técnica \nCamilo Andrés Pérez Ospino'
     return templates.TemplateResponse("predict.html", {"request": request, 'title':title})
 
 async def capture_video(websocket: WebSocket):
@@ -64,11 +65,12 @@ async def capture_video(websocket: WebSocket):
         # Decodificar los datos de la imagen en base64
         img = utils.base64toimage(data.split(',')[1].encode(), save=False)
         # Procesar el cuadro de video
-        flag , img, img_predict = face_detect(img, plot=False, on_predictions=True)
+        flag , img, img_predict, results = face_detect(img, plot=False, on_predictions=True)
         img = cv2.flip(img, 1)
         if flag:
+            #[print("||||", detection)  for detection in results]
             img_predict = face_recognizer.preprocess_image(img_predict) 
-            result = face_recognizer.predict(img_predict)
+            result = face_recognizer.predict(img_predict, img)
             print("Result: ", result)
         _, buffer = cv2.imencode('.jpg', img)
         processed_frame =  base64.b64encode(buffer).decode("ascii")

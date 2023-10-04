@@ -117,13 +117,16 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
                     ymin = int(detection.location_data.relative_bounding_box.ymin * height)
                     w = int(detection.location_data.relative_bounding_box.width * width)
                     h = int(detection.location_data.relative_bounding_box.height * height)
-                    cv.rectangle(image_dw, (xmin, ymin), (xmin + w, ymin + h), (0, 255, 0), 3)
+                    cv.rectangle(image_dw, (xmin, ymin), (xmin + w, ymin + h), (255, 0, 0), 3)
+                    image_dw = cv.flip(image_dw, 1)
+                    cv.putText(image_dw, "Score detect face: " + str(round(detection.score[0],3)), [10, 30], cv.FONT_HERSHEY_SIMPLEX, 1,(255, 0, 0), 1)
+                    image_dw = cv.flip(image_dw, 1)
                     if on_predictions:
                         flag = True
                         img_predict = image[ymin:ymin + h,xmin:xmin + w]
-                        return flag, image_dw, img_predict
+                        return flag, image_dw, img_predict, Results
     
-    return flag, image_dw, img_predict
+    return flag, image_dw, img_predict, None
                 
 
 
