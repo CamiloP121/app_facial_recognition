@@ -27,6 +27,7 @@ RUN sed -i -e 's/# es_CO.UTF-8 UTF-8/es_CO.UTF-8 UTF-8/' /etc/locale.gen && \
 RUN pip install fastapi && \
    pip install 'uvicorn[standard]' && \
    pip install Jinja2 && \
+   pip install keras && \
    pip install mediapipe
    
 ENV LANG es_CO.UTF-8
