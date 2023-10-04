@@ -17,6 +17,54 @@ def plot_image(image:np.ndarray,name_window:str):
     # and finally destroy/close all open windows
     cv.destroyAllWindows()
 
+def One_Face(Result,h,w):
+    ''' 
+    Function to have a single face
+    If there are more than two detections, it selects the two that are closest to the camera
+    ----------------------------------------------------------------
+    Args:
+    - Result: object with result MediaPipe
+    - h: height of the image
+    - w: width of the image
+    '''
+    Vec_A = []
+    for detection in Result.detections:
+        we = int(detection.location_data.relative_bounding_box.width * w)
+        hg = int(detection.location_data.relative_bounding_box.height * h)
+        Vec_A.append(we*hg)
+
+    Index = Vec_A.index(max(Vec_A))
+    return [Result.detections[Index]]
+
+def Norm_Bounding(detection:object):
+    '''
+    Function to verify that the Bounding box does not exceed the limits of the image.
+    In case with points out of the image will remplace with 1.0
+    ----------------------------------------------------------------
+    Args:
+    - detection: object with results of MediaPipe
+    Returns:
+    - detection: object with results of MediaPipe
+    - flags: True if the detection Ok or False if the detection is out of image
+    '''
+    flag = True
+    if detection.location_data.relative_bounding_box.xmin < 0 or detection.location_data.relative_bounding_box.ymin < 0:
+        flag = False
+    # Verificar x
+    if (detection.location_data.relative_bounding_box.xmin + detection.location_data.relative_bounding_box.width
+        > 1.0):
+        Dif = detection.location_data.relative_bounding_box.xmin + detection.location_data.relative_bounding_box.width - 1
+        detection.location_data.relative_bounding_box.width = detection.location_data.relative_bounding_box.width - Dif
+        flag = True
+    # Verificar y
+    if (detection.location_data.relative_bounding_box.ymin + detection.location_data.relative_bounding_box.height
+        > 1.0):
+        Dif = detection.location_data.relative_bounding_box.ymin + detection.location_data.relative_bounding_box.height - 1
+        detection.location_data.relative_bounding_box.height = detection.location_data.relative_bounding_box.height - Dif
+        flag = True
+
+    return detection, flag
+
 def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
     '''
     Detect face in image
@@ -32,11 +80,7 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
     dic_results: dictionary with information of face detection
     '''
      # Crate mp-face model detection
-    mp_face_mesh = mp.solutions.face_mesh
-    mp_drawing = mp.solutions.drawing_utils
-    index_list = [70, 63, 105, 66, 107, 336, 296, 334, 293, 300,
-                    122, 196, 3, 51, 281, 248, 419, 351, 37, 0, 267]
-    
+    mp_face_detection = mp.solutions.face_detection
     # Image original -> image
     if plot:
         plot_image(image,name_window='original image')
@@ -49,30 +93,34 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
     flag = False
     dic_result = None
 
-    with mp_face_mesh.FaceMesh(
-        static_image_mode=False,
-        max_num_faces=1,
-        min_detection_confidence=0.65) as face_mesh:
+    with mp_face_detection.FaceDetection(
+        min_detection_confidence=0.6) as face_detection:
 
         # Dimnesiones (Relebant for the extraction of stitches)
         height, width, _ = image.shape
         # Convert to RGB, neceesary for MediaPipe
         frame_rgb = cv.cvtColor(image_dw, cv.COLOR_BGR2RGB)
         # Model results
-        results = face_mesh.process(frame_rgb)
-        if results.multi_face_landmarks is not None:
+        Result = face_detection.process(frame_rgb)
+        if Result.detections is not None:
             lb = 'Se detecto mano'
-            # Extract face points
-            # dic_result, flag = extract_hand_points(results)
-            # Prediction module
-            for face_landmarks in results.multi_face_landmarks:
-                for index in index_list:
-                    x = int(face_landmarks.landmark[index].x * width)
-                    y = int(face_landmarks.landmark[index].y * height)
-                    cv.circle(image_dw, (x, y), 2, (255, 0, 255), 2)
-            if on_predictions:
-               # image_dw = model_predict(dic_distances,dic_result,image)
-               return None, image_dw, None
+            if len(Result.detections) > 1:
+                # Only one face
+                Results = One_Face(Result,height,width)
+            else:
+                Results = Result.detections
+            for detection in Results:
+                detection, flag_ok = Norm_Bounding(detection)
+                if flag_ok:
+                    # Bounding Box
+                    xmin = int(detection.location_data.relative_bounding_box.xmin * width)
+                    ymin = int(detection.location_data.relative_bounding_box.ymin * height)
+                    w = int(detection.location_data.relative_bounding_box.width * width)
+                    h = int(detection.location_data.relative_bounding_box.height * height)
+                    cv.rectangle(image_dw, (xmin, ymin), (xmin + w, ymin + h), (0, 255, 0), 3)
+                    if on_predictions:
+                        # image_dw = model_predict(dic_distances,dic_result,image)
+                        return None, image_dw, None
     
     return flag, image_dw, dic_result
                 
