@@ -8,8 +8,10 @@ from pathlib import Path
 import logging
 from starlette.datastructures import URL
 from modules.backend.face_mediapipe import face_detect
+from modules.backend.ia_models import Model
 import cv2
 import base64
+import json
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -32,6 +34,15 @@ Path('logs').mkdir(parents=True, exist_ok=True)
 app.mount("/static", StaticFiles(directory="modules/static"), name="static")
 templates = Jinja2Templates(directory="modules/static/templates")
 
+# Create class model
+with open('modules/backend/name_clases.json', 'r') as file:
+    lables = json.load(file)
+
+face_recognizer = Model(
+    path_model_FR= "models/model_face_recognition.h5",
+    dict_labels=lables
+)
+
 # Predit page
 @app.route("/ArkangelAI/predict")
 def predict(request:Request):
@@ -53,8 +64,12 @@ async def capture_video(websocket: WebSocket):
         # Decodificar los datos de la imagen en base64
         img = utils.base64toimage(data.split(',')[1].encode(), save=False)
         # Procesar el cuadro de video
-        _ , img, _ = face_detect(img, plot=False, on_predictions=True)
+        flag , img, img_predict = face_detect(img, plot=False, on_predictions=True)
         img = cv2.flip(img, 1)
+        if flag:
+            img_predict = face_recognizer.preprocess_image(img_predict) 
+            result = face_recognizer.predict(img_predict)
+            print("Result: ", result)
         _, buffer = cv2.imencode('.jpg', img)
         processed_frame =  base64.b64encode(buffer).decode("ascii")
 

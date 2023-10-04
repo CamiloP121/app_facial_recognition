@@ -85,13 +85,13 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
     if plot:
         plot_image(image,name_window='original image')
 
-     # Image draw results -> image_dw
+    # Image draw results -> image_dw
     ## Flip image and copy
     image_dw = image.copy()
     image_dw = cv.flip(image_dw, 1)
     lb = 'No se detecta rostro'
     flag = False
-    dic_result = None
+    img_predict = None
 
     with mp_face_detection.FaceDetection(
         min_detection_confidence=0.6) as face_detection:
@@ -119,10 +119,11 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
                     h = int(detection.location_data.relative_bounding_box.height * height)
                     cv.rectangle(image_dw, (xmin, ymin), (xmin + w, ymin + h), (0, 255, 0), 3)
                     if on_predictions:
-                        # image_dw = model_predict(dic_distances,dic_result,image)
-                        return None, image_dw, None
+                        flag = True
+                        img_predict = image[ymin:ymin + h,xmin:xmin + w]
+                        return flag, image_dw, img_predict
     
-    return flag, image_dw, dic_result
+    return flag, image_dw, img_predict
                 
 
 
