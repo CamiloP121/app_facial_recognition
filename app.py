@@ -13,6 +13,7 @@ import cv2
 import base64
 import json
 import pickle
+from tensorflow.keras.applications.vgg16 import VGG16
 
 import warnings
 warnings.filterwarnings("ignore")
@@ -36,14 +37,14 @@ app.mount("/static", StaticFiles(directory="modules/static"), name="static")
 templates = Jinja2Templates(directory="modules/static/templates")
 
 # Create class model
-with open('models/matriz_face_detection.pkl', 'rb') as file:
+with open('models/matriz_face_detection_v3.pkl', 'rb') as file:
     lables = pickle.load(file)
 
 with open('models/matriz_emotions.pkl', 'rb') as file:
     lables2 = pickle.load(file)
 
 face_recognizer = Model(
-    path_model_FR= "models/VGG16.h5",
+    model= VGG16(include_top=True),
     dict_face=lables,
     dict_emotions=lables2
 )

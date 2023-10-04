@@ -123,7 +123,7 @@ def face_detect(image:np.ndarray,plot:bool, on_predictions:bool=False):
                     image_dw = cv.flip(image_dw, 1)
                     if on_predictions:
                         flag = True
-                        img_predict = image[ymin:ymin + h,xmin:xmin + w]
+                        img_predict = image#[ymin:ymin + h,xmin:xmin + w]
                         return flag, image_dw, img_predict, Results
     
     return flag, image_dw, img_predict, None

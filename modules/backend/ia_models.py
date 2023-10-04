@@ -5,8 +5,8 @@ import cv2 as cv
 
 
 class Model():
-    def __init__(self, path_model_FR:str, dict_face:dict,dict_emotions:dict):
-        self.model = load_model(path_model_FR)
+    def __init__(self, model, dict_face:dict,dict_emotions:dict):
+        self.model = model
         self.threshold_face = 0.2
         self.threshold_emo = 0.8
         self.labels_face = dict_face
