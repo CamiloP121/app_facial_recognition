@@ -39,9 +39,13 @@ templates = Jinja2Templates(directory="modules/static/templates")
 with open('models/matriz_face_detection.pkl', 'rb') as file:
     lables = pickle.load(file)
 
+with open('models/matriz_emotions.pkl', 'rb') as file:
+    lables2 = pickle.load(file)
+
 face_recognizer = Model(
     path_model_FR= "models/VGG16.h5",
-    dict_labels=lables
+    dict_face=lables,
+    dict_emotions=lables2
 )
 
 # Predit page
@@ -70,8 +74,8 @@ async def capture_video(websocket: WebSocket):
         if flag:
             #[print("||||", detection)  for detection in results]
             img_predict = face_recognizer.preprocess_image(img_predict) 
-            result = face_recognizer.predict(img_predict, img)
-            print("Result: ", result)
+            result, result_emo = face_recognizer.predict(img_predict, img)
+            print("Result: ", result, result_emo)
         _, buffer = cv2.imencode('.jpg', img)
         processed_frame =  base64.b64encode(buffer).decode("ascii")
 
