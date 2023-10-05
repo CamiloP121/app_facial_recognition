@@ -76,7 +76,7 @@ async def capture_video(websocket: WebSocket):
             #[print("||||", detection)  for detection in results]
             img_predict = face_recognizer.preprocess_image(img_predict) 
             result, result_emo = face_recognizer.predict(img_predict, img)
-            print("Result: ", result, result_emo)
+            # print("Result: ", result, result_emo)
         _, buffer = cv2.imencode('.jpg', img)
         processed_frame =  base64.b64encode(buffer).decode("ascii")
 
